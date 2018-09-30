@@ -1,0 +1,15 @@
+version: '3'
+services:
+    web:
+        image: local/nginx
+        ports:
+            - "8080:80"
+        networks:
+            - code-network
+    php:
+        image: local/phpfpm
+        networks:
+            - code-network
+networks:
+    code-network:
+        driver: bridge
