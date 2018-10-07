@@ -10,6 +10,12 @@ services:
         image: local/phpfpm
         networks:
             - code-network
+    mariadb:
+        image: local/mariadb
+        volumes:
+            - /data/mysql:/var/lib/mysql
+        networks:
+            - code-network
 networks:
     code-network:
         driver: bridge
