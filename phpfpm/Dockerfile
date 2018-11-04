@@ -23,6 +23,7 @@ RUN apk add --no-cache --virtual .php-deps \
         php7-openssl \
         php7-pdo \
         php7-pdo_mysql \
+        php7-redis \
         php7-soap \
         php7-xmlreader \
         php7-xmlrpc \
@@ -39,10 +40,17 @@ RUN apk add --no-cache --virtual .php-deps \
     && sed -i s/database_name_here/$WP_DB/ /var/www/html/wp-config.php \
     && sed -i s/username_here/$WP_USER/ /var/www/html/wp-config.php \
     && sed -i s/password_here/$WP_PWD/ /var/www/html/wp-config.php \
-    && sed -i s/localhost/$DB_HOST/ /var/www/html/wp-config.php
+    && sed -i s/localhost/$DB_HOST/ /var/www/html/wp-config.php \
+    \
+    # add redis plugins
+    \
+    && mkdir -p /var/www/html/wp-content/plugins/redis
 
 COPY docker.conf /etc/php7/php-fpm.d/docker.conf
+COPY wp-redis-user-session-storage.php /var/www/html/wp-content/plugins/redis
+COPY docker-entrypoint.sh /usr/local/bin
 
 EXPOSE 9000
 
-CMD ["php-fpm7", "-F"]
+ENTRYPOINT ["docker-entrypoint.sh"]
+

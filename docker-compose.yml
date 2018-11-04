@@ -1,21 +1,52 @@
 version: '3'
 services:
     web:
-        image: local/nginx
+        image: misbahulard/nginx
+        environment:
+            - SERVICE_PORTS=80
         ports:
-            - "8080:80"
+            - 80
+        volumes:
+            - wp_content:/var/www/html/wp-content/uploads
         networks:
-            - code-network
+            - internals
     php:
-        image: local/phpfpm
+        image: misbahulard/phpfpm
+        environment:
+            USE_REDIS: "yes"
+        volumes:
+            - wp_content:/var/www/html/wp-content/uploads
         networks:
-            - code-network
+            - internals
     mariadb:
-        image: local/mariadb
+        image: misbahulard/mariadb
         volumes:
             - /data/mysql:/var/lib/mysql
         networks:
-            - code-network
+            - internals
+    redis:
+        image: misbahulard/redis
+        networks:
+            - internals
+    proxy:
+        image: dockercloud/haproxy
+        environment:
+          - BALANCE=leastconn
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
+        ports:
+          - 80:80
+        networks:
+          - internals
+        deploy:
+          placement:
+            constraints: [node.role == manager]
 networks:
-    code-network:
-        driver: bridge
+    internals:
+        driver: overlay
+volumes:
+    wp_content:
+        driver_opts:
+            type: "nfs"
+            o: "addr=192.168.56.101"
+            device: ":/var/nfs/wp-content"

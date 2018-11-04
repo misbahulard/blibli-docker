@@ -18,9 +18,6 @@ else
 
     chown -R mysql:mysql /var/lib/mysql
 
-    # update mysql.cnf
-    # sed -i "s/.*bind-address.*/bind-address = 0.0.0.0/" /etc/mysql/my.cnf
-
     # init database
     echo '[i] Initializing database'
     mysql_install_db --user=mysql > /dev/null

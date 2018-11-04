@@ -6,11 +6,10 @@ RUN apk add --no-cache \
     mariadb \
     mariadb-client
 
-COPY docker-entrypoint.sh /
-RUN chmod +x docker-entrypoint.sh
+COPY docker-entrypoint.sh /usr/local/bin
 
 VOLUME ["/var/lib/mysql"]
 
 EXPOSE 3306
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
+ENTRYPOINT ["docker-entrypoint.sh"]

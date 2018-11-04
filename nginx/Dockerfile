@@ -109,10 +109,15 @@ RUN apk add --no-cache --virtual .build-deps \
     && sed -i s/database_name_here/$WP_DB/ /var/www/html/wp-config.php \
     && sed -i s/username_here/$WP_USER/ /var/www/html/wp-config.php \
     && sed -i s/password_here/$WP_PWD/ /var/www/html/wp-config.php \
-    && sed -i s/localhost/$DB_HOST/ /var/www/html/wp-config.php
+    && sed -i s/localhost/$DB_HOST/ /var/www/html/wp-config.php \
+    \
+    # add redis plugins
+    \
+    && mkdir -p /var/www/html/wp-content/plugins/redis
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY nginx.vh.default.conf /etc/nginx/conf.d/default.conf
+COPY wp-redis-user-session-storage.php /var/www/html/wp-content/plugins/redis
 
 EXPOSE 80
 
