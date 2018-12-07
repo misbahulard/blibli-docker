@@ -3,10 +3,6 @@ FROM alpine:3.8
 LABEL mainainer="Misbahul Ardani <misbahulard@gmail.com>"
 
 ENV WORDPRESS_VERSION 4.9.8
-ENV WP_DB wordpress 
-ENV WP_USER wpuser
-ENV WP_PWD wpuser
-ENV DB_HOST mariadb
 
 RUN apk add --no-cache --virtual .php-deps \
         curl \
@@ -37,10 +33,6 @@ RUN apk add --no-cache --virtual .php-deps \
     && adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx \
     && rm -rf /etc/php7/php-fpm.d/www.conf \
     && mv /var/www/html/wp-config-sample.php /var/www/html/wp-config.php \
-    && sed -i s/database_name_here/$WP_DB/ /var/www/html/wp-config.php \
-    && sed -i s/username_here/$WP_USER/ /var/www/html/wp-config.php \
-    && sed -i s/password_here/$WP_PWD/ /var/www/html/wp-config.php \
-    && sed -i s/localhost/$DB_HOST/ /var/www/html/wp-config.php \
     \
     # add redis plugins
     \
@@ -49,6 +41,8 @@ RUN apk add --no-cache --virtual .php-deps \
 COPY docker.conf /etc/php7/php-fpm.d/docker.conf
 COPY wp-redis-user-session-storage.php /var/www/html/wp-content/plugins/redis
 COPY docker-entrypoint.sh /usr/local/bin
+
+VOLUME /var/www/html/wp-content
 
 EXPOSE 9000
 

@@ -2,28 +2,39 @@ version: '3.2'
 services:
     web:
         image: misbahulard/nginx
+        environment:
+            - PHP_HOST=blibli_php
+            - DB_HOST=blibli_mariadb
         ports:
             - target: 80
               published: 8080
               protocol: tcp
         volumes:
-            - wp-content:/var/www/html/wp-content
+            - type: volume
+              source: wp-content
+              target: /var/www/html/wp-content
         networks:
             - internal
     php:
         image: misbahulard/phpfpm
         environment:
-            USE_REDIS: "yes"
+            - USE_REDIS=yes
+            - REDIS_HOST=blibli_redis
+            - DB_HOST=blibli_mariadb
         volumes:
-            - wp-content:/var/www/html/wp-content
+            - type: volume
+              source: wp-content
+              target: /var/www/html/wp-content
         networks:
             - internal
-    #mariadb:
-    #    image: misbahulard/mariadb
-    #    volumes:
-    #        - mysql-data:/var/lib/mysql
-    #    networks:
-    #        - internal
+    mariadb:
+        image: misbahulard/mariadb
+        volumes:
+            - type: volume
+              source: mysql-data
+              target: /var/lib/mysql
+        networks:
+            - internal
     redis:
         image: misbahulard/redis
         networks:

@@ -1,7 +1,12 @@
 version: '3.2'
 services:
-    web:
+    nginx:
         image: misbahulard/nginx
+        environment:
+            DB_HOST: "blibli_mariadb"
+            PHP_HOST: "blibli_php"
+        depends_on:
+            - php
         ports:
             - target: 80
               published: 8080
@@ -10,20 +15,27 @@ services:
             - wp-content:/var/www/html/wp-content
         networks:
             - internal
+        command: dockerize -wait tcp://php:9000 nginx -g "daemon off;"
     php:
         image: misbahulard/phpfpm
         environment:
             USE_REDIS: "yes"
+            DB_HOST: "blibli_mariadb"
+            REDIS_HOST: "blibli_redis"
         volumes:
             - wp-content:/var/www/html/wp-content
         networks:
             - internal
-    #mariadb:
-    #    image: misbahulard/mariadb
-    #    volumes:
-    #        - mysql-data:/var/lib/mysql
-    #    networks:
-    #        - internal
+    mariadb:
+        image: misbahulard/mariadb
+        volumes:
+            - /data/mysql:/var/lib/mysql
+        networks:
+            - internal
+        deploy:
+            placement:
+                constraints:
+                    - node.labels.type == db
     redis:
         image: misbahulard/redis
         networks:
@@ -35,10 +47,7 @@ volumes:
     wp-content:
         driver_opts:
             type: "nfs"
-            o: "addr=192.168.56.101,rw"
+            o: "addr=192.168.56.100,rw"
             device: ":/var/nfs/wp-content"
-    mysql-data:
-        driver_opts:
-            type: "nfs"
-            o: "addr=192.168.56.101,rw"
-            device: ":/var/nfs/mysql"
+#    mysql-data:
+#        - /data/mysql:/var/lib/mysql

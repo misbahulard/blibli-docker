@@ -4,10 +4,6 @@ LABEL maintainer="Misbahul Ardani <misbahulard@gmail.com>"
 
 ENV NGINX_VERSION 1.15.4
 ENV WORDPRESS_VERSION 4.9.8
-ENV WP_DB wordpress
-ENV WP_USER wpuser
-ENV WP_PWD wpuser
-ENV DB_HOST mariadb
 
 RUN apk add --no-cache --virtual .build-deps \
         build-base \
@@ -103,13 +99,9 @@ RUN apk add --no-cache --virtual .build-deps \
     && ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log \
     \
-    # set wp-config
+    # copy wp-config
     \
     && mv /var/www/html/wp-config-sample.php /var/www/html/wp-config.php \
-    && sed -i s/database_name_here/$WP_DB/ /var/www/html/wp-config.php \
-    && sed -i s/username_here/$WP_USER/ /var/www/html/wp-config.php \
-    && sed -i s/password_here/$WP_PWD/ /var/www/html/wp-config.php \
-    && sed -i s/localhost/$DB_HOST/ /var/www/html/wp-config.php \
     \
     # add redis plugins
     \
@@ -118,9 +110,10 @@ RUN apk add --no-cache --virtual .build-deps \
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY nginx.vh.default.conf /etc/nginx/conf.d/default.conf
 COPY wp-redis-user-session-storage.php /var/www/html/wp-content/plugins/redis
+COPY docker-entrypoint.sh /usr/local/bin
 
 EXPOSE 80
 
 STOPSIGNAL SIGTERM
 
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["docker-entrypoint.sh"]
